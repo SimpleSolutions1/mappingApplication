@@ -8,12 +8,15 @@ import com.simpleSolutions.exception.OutOfRangeException;
 import com.simpleSolutions.repository.CategoryRepository;
 import com.simpleSolutions.repository.WordRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-
+@Component
+@Primary
 @AllArgsConstructor
 public class MappingService implements DivisorMapping {
     private final int MIN_RANGE = 1;
