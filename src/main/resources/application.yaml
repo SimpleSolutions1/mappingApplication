@@ -19,3 +19,8 @@ spring:
     locations: classpath:db/migrations
 server:
   port: 8080
+logging:
+  level:
+    org:
+      hibernate:
+        type: trace

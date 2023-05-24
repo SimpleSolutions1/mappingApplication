@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class WordRequestModelDTO {
+public class MappingModelDTO {
     private String categoryName;
 
     private List<Integer> numberList;

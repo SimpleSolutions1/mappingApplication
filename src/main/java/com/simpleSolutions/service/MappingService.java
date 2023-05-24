@@ -1,6 +1,6 @@
 package com.simpleSolutions.service;
 
-import com.simpleSolutions.dto.WordRequestModelDTO;
+import com.simpleSolutions.dto.MappingModelDTO;
 import com.simpleSolutions.entity.Category;
 import com.simpleSolutions.entity.Word;
 import com.simpleSolutions.exception.CategoryNotFoundException;
@@ -21,16 +21,16 @@ public class MappingService implements DivisorMapping {
     private final WordRepository wordRepository;
     private final CategoryRepository categoryRepository;
 
-    public Map<Integer, List<String>> getDivisorsMap(WordRequestModelDTO wordRequestModelDTO) throws OutOfRangeException {
+    public Map<Integer, List<String>> getDivisorsMap(MappingModelDTO mappingModelDTO) {
         Map<Integer, List<String>> returnedMap = new HashMap<>();
-        Optional<Category> category = Optional.ofNullable(categoryRepository.findByName(wordRequestModelDTO.getCategoryName()));
+        Optional<Category> category = Optional.ofNullable(categoryRepository.findByName(mappingModelDTO.getCategoryName()));
         if (!category.isPresent()) {
-            throw new CategoryNotFoundException(wordRequestModelDTO.getCategoryName());
+            throw new CategoryNotFoundException(mappingModelDTO.getCategoryName());
         }
-        if(numberIsOutOfRange(wordRequestModelDTO.getNumberList())){
-            throw new OutOfRangeException(wordRequestModelDTO.getNumberList(), MAX_RANGE, MIN_RANGE);
+        if (numberIsOutOfRange(mappingModelDTO.getNumberList())) {
+            throw new OutOfRangeException(mappingModelDTO.getNumberList(), MAX_RANGE, MIN_RANGE);
         }
-        Map<Integer, List<Integer>> findDivisorMap = findDivisors(wordRequestModelDTO.getNumberList());
+        Map<Integer, List<Integer>> findDivisorMap = findDivisors(mappingModelDTO.getNumberList());
         List<Integer> divisorsList = findDivisorMap.values().stream().flatMap(Collection::stream).distinct().collect(Collectors.toList());
         Map<Integer, String> wordMap = wordRepository.findByCategoryAndDivisorList(category.get().getId(), divisorsList).stream()
                 .collect(Collectors.toMap(Word::getNumber, Word::getWord));
@@ -38,11 +38,17 @@ public class MappingService implements DivisorMapping {
         findDivisorMap.entrySet().stream()
                 .map(Map.Entry::getKey)
                 .forEach(k -> {
-                    List<String> wordList = List.of();
-                    findDivisorMap.get(k).forEach(v -> wordList.add(wordMap.getOrDefault(v, null)));
-                    returnedMap.put(k, wordList.stream().filter(Objects::nonNull).toList());
+                    mappingDividorsToWords(returnedMap, k, findDivisorMap, wordMap);
                 });
         return returnedMap;
+    }
+
+    private void mappingDividorsToWords(Map<Integer, List<String>> returnedMap, Integer k, Map<Integer, List<Integer>> findDivisorMap, Map<Integer, String> wordMap) {
+        List<String> wordList = new ArrayList<>();
+        findDivisorMap.get(k).forEach(v -> wordList.add(wordMap.getOrDefault(v, null)));
+        if (!returnedMap.values().stream().anyMatch(l -> l.equals(wordList))) {
+            returnedMap.put(k, wordList.stream().filter(Objects::nonNull).toList());
+        }
     }
 
     private boolean numberIsOutOfRange(List<Integer> numbers) {
