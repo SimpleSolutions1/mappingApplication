@@ -49,7 +49,7 @@ public class MappingService implements DivisorMapping {
     private void mappingDividorsToWords(Map<Integer, List<String>> returnedMap, Integer k, Map<Integer, List<Integer>> findDivisorMap, Map<Integer, String> wordMap) {
         List<String> wordList = new ArrayList<>();
         findDivisorMap.get(k).forEach(v -> wordList.add(wordMap.getOrDefault(v, null)));
-        if (!returnedMap.values().stream().anyMatch(l -> l.equals(wordList))) {
+        if (!returnedMap.values().stream().anyMatch(l -> l.equals(wordList.stream().filter(Objects::nonNull).toList()))) {
             returnedMap.put(k, wordList.stream().filter(Objects::nonNull).toList());
         }
     }
